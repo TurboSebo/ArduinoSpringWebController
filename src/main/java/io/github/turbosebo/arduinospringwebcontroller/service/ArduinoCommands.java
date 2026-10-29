@@ -32,8 +32,8 @@ public final class ArduinoCommands {
 
     // Komendy parametryzowane z inżynierki FESG
     public static String setDac(int value) {
-        StringBuilder sb = new StringBuilder(DAC_PREFIX.length() + 5);
-        return sb.append(DAC_PREFIX).append(value).toString();
+        StringBuilder stringBuilder = new StringBuilder(DAC_PREFIX.length() + 5);
+        return stringBuilder.append(DAC_PREFIX).append(value).toString();
     }
 
     public static String setDac(String value) {
@@ -41,12 +41,12 @@ public final class ArduinoCommands {
     }
 
     public static String setFrequency(float frequency) {
-        StringBuilder sb = new StringBuilder(FREQ_PREFIX.length() + 8);
-        return sb.append(FREQ_PREFIX).append(frequency).toString();
+        StringBuilder stringBuilder = new StringBuilder(FREQ_PREFIX.length() + 8);
+        return stringBuilder.append(FREQ_PREFIX).append(frequency).toString();
     }
 
     public static String burst(int count) {
-        StringBuilder sb = new StringBuilder(BURST_PREFIX.length() + 6);
-        return sb.append(BURST_PREFIX).append(count).toString();
+        StringBuilder stringBuilder = new StringBuilder(BURST_PREFIX.length() + 6);
+        return stringBuilder.append(BURST_PREFIX).append(count).toString();
     }
 }
