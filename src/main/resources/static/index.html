@@ -3,26 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arduino Spring Web Controller</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="theme-color" content="#0f172a">
+    <title>Arduino Control Center</title>
+    <link rel="stylesheet" href="/styles.css">
 </head>
-<body class="bg-light">
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-sm">
-                <div class="card-body p-4 text-center">
-                    <h2 class="card-title mb-3">Arduino Spring Web Controller</h2>
-                    <p class="text-muted mb-4">
-                        Aplikacja webowa uruchomiona pomyślnie. Serwer Spring Boot nasłuchuje na porcie 8080.
-                    </p>
-                    <div class="alert alert-success d-inline-block px-4 py-2" role="alert">
-                        Status: Gotowy do podłączenia warstwy sprzętowej
-                    </div>
+<body>
+<main class="shell">
+    <header>
+        <div>
+            <div class="eyebrow">FESG · Arduino</div>
+            <h1>Arduino Control Center</h1>
+            <p class="subtitle">Zarządzaj połączeniem i steruj urządzeniem z poziomu przeglądarki.</p>
+        </div>
+        <div class="connection-badge"><span id="statusDot" class="dot"></span><span id="statusText">Sprawdzanie statusu…</span></div>
+    </header>
+
+    <div class="grid">
+        <section class="card">
+            <h2>Połączenie z urządzeniem</h2>
+            <label for="portSelect">Dostępny port</label>
+            <select id="portSelect"><option value="">Ładowanie portów…</option></select>
+            <div class="actions">
+                <button id="refreshButton" class="secondary" type="button">Odśwież porty</button>
+                <button id="connectButton" type="button">Połącz</button>
+                <button id="disconnectButton" class="danger" type="button">Rozłącz</button>
+            </div>
+            <div id="connectionMessage" class="message" aria-live="polite"></div>
+        </section>
+
+        <section class="card">
+            <h2>Informacje o urządzeniu</h2>
+            <div class="status-layout">
+                <div class="metric"><div class="metric-label">Stan</div><div id="stateValue" class="metric-value">—</div></div>
+                <div class="metric"><div class="metric-label">Port</div><div id="portValue" class="metric-value">—</div></div>
+                <div class="metric"><div class="metric-label">Identyfikator</div><div id="deviceValue" class="metric-value">—</div></div>
+            </div>
+            <div id="lastMessage" class="message">Ostatnia odpowiedź: —</div>
+        </section>
+
+        <section class="card full">
+            <div class="led-panel">
+                <div>
+                    <h2>Kontrola diody LED</h2>
+                    <div class="led-indicator"><span id="ledIndicator" class="led"></span><span id="ledState" class="led-state">Stan nieznany</span></div>
+                </div>
+                <div class="actions">
+                    <button id="ledOnButton" type="button">Włącz LED</button>
+                    <button id="ledOffButton" class="secondary" type="button">Wyłącz LED</button>
                 </div>
             </div>
-        </div>
+            <div id="ledMessage" class="message" aria-live="polite"></div>
+        </section>
     </div>
-</div>
+    <div class="footer">Backend Spring Boot · API Arduino</div>
+</main>
+<script src="/app.js"></script>
 </body>
 </html>

@@ -2,8 +2,10 @@ package io.github.turbosebo.arduinospringwebcontroller.service;
 
 import com.fazecast.jSerialComm.SerialPort;
 import jakarta.annotation.PreDestroy;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -14,6 +16,11 @@ public class ArduinoService {
 
     private final ArduinoCommunicator communicator;
     private final ArduinoConnectionVerifier verifier;
+
+    @Value("${fesg.simulation.enabled:false}")
+    private boolean simulationEnabled;
+
+    private static final String SIMULATED_PORT_NAME = "VIRTUAL_COM_FESG";
 
     private volatile ConnectionState currentState = ConnectionState.DISCONNECTED;
     private volatile String detectedPort = "";
@@ -33,9 +40,14 @@ public class ArduinoService {
     }
 
     public List<PortInfo> getAvailablePorts() {
-        return Arrays.stream(SerialPort.getCommPorts())
+        List<PortInfo> ports = Arrays.stream(SerialPort.getCommPorts())
                 .map(p -> new PortInfo(p.getSystemPortName(), p.getDescriptivePortName()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
+        if (simulationEnabled) {
+            ports.add(new PortInfo(SIMULATED_PORT_NAME, "Wirtualny Emulator Arduino (FESG Mock)"));
+        }
+        return ports;
+
     }
 
     public synchronized boolean connectToPort(String portName) {
@@ -43,8 +55,16 @@ public class ArduinoService {
         System.out.println("Próba połączenia z portem: " + portName);
         this.detectedPort = portName;
         this.deviceIdn = "";
-        updateState(ConnectionState.VERIFYING, "");
 
+        if (simulationEnabled && SIMULATED_PORT_NAME.equals(portName)) {
+            this.deviceIdn = "MY_FESG_ARDUINO_V1.1_WAVE (SIMULATOR)";
+            updateState(ConnectionState.CONNECTED, "");
+            this.lastReceivedMessage = "SIM_READY";
+            return true;
+        }
+
+        // Ścieżka fizycznego sprzętu
+        updateState(ConnectionState.VERIFYING, "");
         ArduinoConnectionVerifier.VerificationResult result = verifier.verifyAndConnect(portName);
 
         if (result.success() && result.port() != null) {
@@ -75,6 +95,18 @@ public class ArduinoService {
      * Wysyła komendę do Arduino (np. "LED:1", "DAC:2000", "READV?")
      */
     public void send(String command) {
+        // Obsługa wysyłania w trybie symulacji
+        if (simulationEnabled && SIMULATED_PORT_NAME.equals(this.detectedPort)) {
+            if ("LED:1".equals(command.trim())) {
+                this.lastReceivedMessage = "OK:LED_ON";
+            } else if ("LED:0".equals(command.trim())) {
+                this.lastReceivedMessage = "OK:LED_OFF";
+            } else {
+                this.lastReceivedMessage = "OK:" + command.trim();
+            }
+            return;
+        }
+
         if (currentState == ConnectionState.CONNECTED && communicator.isConnected()) {
             communicator.sendData(command);
         } else {

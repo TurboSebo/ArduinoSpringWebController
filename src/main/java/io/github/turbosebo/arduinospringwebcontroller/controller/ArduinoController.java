@@ -68,18 +68,21 @@ public class ArduinoController {
         if (state != 0 && state != 1) {
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "ERROR",
-                    "message", "Dozwolone stany to 0 (wyłącz) lub 1 (włącz)."
+                    "message", "Stan diody musi wynosić 0 (wyłącz) lub 1 (włącz)."
             ));
         }
 
         long startTime = System.nanoTime();
         try {
             arduinoService.setLedState(state == 1);
+            // Daj wątkowi nasłuchującemu czas na odebranie odpowiedzi z portu szeregowego.
+            Thread.sleep(15);
             double durationMs = (System.nanoTime() - startTime) / 1_000_000.0;
+
             return ResponseEntity.ok(Map.of(
                     "status", "SUCCESS",
                     "ledState", state,
-                    "deviceReply", "Wysłano LED:" + state + " (Ostatni RX: " + arduinoService.getLastReceivedMessage() + ")",
+                    "deviceReply", arduinoService.getLastReceivedMessage(),
                     "backendTimeMs", durationMs
             ));
         } catch (Exception e) {
